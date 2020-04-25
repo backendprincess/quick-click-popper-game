@@ -17,6 +17,47 @@
             </div>
         </div>
         <script>
+            const playArea = {};
+            const player = {};
+
+            playArea.stats = document.querySelector('.stats');
+            playArea.main = document.querySelector('.main');
+            playArea.game = document.querySelector('.main');
+            playArea.btns = Array.from(document.querySelectorAll('.btn'));
+            playArea.pages = Array.from(document.querySelectorAll('.page'));
+            document.addEventListener('DOMContentLoaded', getData);
+
+            player.score = 0;
+            player.items = 3;
+            let gameObj;
+
+            playArea.btns.forEach(function(item) {
+                console.log(item);
+                item.addEventListener('click', handleBtn);
+            });
+
+            function getData() {
+                fetch('my-url')
+                .then(function(rep) {
+                    return rep.json();
+                }).then(function(data) {
+                    gameObj = data.data;
+                    console.log(gameObj);
+                });
+                console.log('DOM loaded');
+            }
+
+            function handleBtn(e) {
+                console.log('hello');
+                if (e.target.classList.contains('newGame')) {
+                    console.log('YES');
+                    startGame();
+                }
+            }
+
+            function startGame() {
+                console.log('start');
+            }
         </script>
     </body>
 </html>
