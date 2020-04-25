@@ -1,6 +1,49 @@
 <html>
     <head>
-        <title></title>
+        <title>JavaScrip Quick Click Popper Game</title>
+        <style>
+            .btn {
+                cursor: pointer;
+                padding: 15px;
+                border: 1px solid black;
+                text-align: center;
+                background-color: blue;
+                color: white;
+            }
+
+            .page {
+                display: none;
+            }
+
+            .visible {
+                display: block;
+            }
+
+            .pop {
+                border: 1px solid #ddd;
+                width: 100px;
+                height: 100px;
+                display: inline-block;
+                text-align: center;
+                vertical-align: middle;
+                color: #ddd;
+                font-size: 2em;
+                font-family: fantasy;
+            }
+
+            .row {
+                display: block;
+            }
+
+            .game {
+                border: 1px solid black;
+            }
+
+            .active {
+                background-color: aquamarine;
+                border: 1px solid red;
+            }
+        </style>
     </head>
     <body>
         <div class="gamearea">
@@ -22,41 +65,96 @@
 
             playArea.stats = document.querySelector('.stats');
             playArea.main = document.querySelector('.main');
-            playArea.game = document.querySelector('.main');
+            playArea.game = document.querySelector('.game');
             playArea.btns = Array.from(document.querySelectorAll('.btn'));
             playArea.pages = Array.from(document.querySelectorAll('.page'));
             document.addEventListener('DOMContentLoaded', getData);
-
-            player.score = 0;
-            player.items = 3;
             let gameObj;
 
             playArea.btns.forEach(function(item) {
-                console.log(item);
                 item.addEventListener('click', handleBtn);
             });
 
             function getData() {
-                fetch('my-url')
+                playArea.main.classList.add('visible');
+                fetch('https://raw.githubusercontent.com/backendprincess/quick-click-popper-game/master/iconsData.json')
                 .then(function(rep) {
                     return rep.json();
                 }).then(function(data) {
                     gameObj = data.data;
-                    console.log(gameObj);
+                    buildBoard();
                 });
-                console.log('DOM loaded');
+            }
+
+            function buildBoard() {
+                console.log('ready');
+                let rows = 4;
+                let cols = 4;
+                let cnt = 0;
+                playArea.game.style.width = cols * 100 + cols * 2;
+                playArea.game.style.margin = 'auto';
+                for (let y = 0; y < rows; ++y) {
+                    let divMain = document.createElement('div');
+                    divMain.setAttribute('class', 'row');
+                    divMain.style.width = cols * 100 + cols * 2;
+                    for (let x = 0; x < cols; ++x) {
+                        let div = document.createElement('div');
+                        div.setAttribute('class', 'pop');
+                        cnt++;
+                        div.innerText = cnt;
+                        div.cnt = cnt;
+                        divMain.appendChild(div);
+                    }
+                    playArea.game.appendChild(divMain);
+                }
             }
 
             function handleBtn(e) {
-                console.log('hello');
                 if (e.target.classList.contains('newGame')) {
-                    console.log('YES');
                     startGame();
                 }
             }
 
             function startGame() {
-                console.log('start');
+                player.score = 0;
+                player.items = 3;
+                playArea.main.classList.remove('visible');
+                playArea.game.classList.add('visible');
+                player.gameOver = false;
+                startPop();
+            }
+
+            function randomUp() {
+                const pops = document.querySelectorAll('.pop');
+                const idx = Math.floor(Math.random() * pops.length);
+                if (pops[idx].cnt == playArea.last) {
+                    return randomUp();
+                }
+
+                playArea.last = pops[idx].cnt;
+                return pops[idx];
+            }
+
+            function startPop() {
+                let newPop = randomUp();
+                newPop.classList.add('active');
+                newPop.addEventListener('click', hitPop);
+
+                const time = Math.round(Math.random() * 1500 + 750);
+                newPop.old = newPop.innerText;
+                newPop.innerHTML = 'HIT';
+                playArea.inPlay = setTimeout(() => {
+                    newPop.classList.remove('active');
+                    newPop.removeEventListener('click', hitPop);
+                    newPop.innerText = newPop.old;
+                    if (!player.gameOver) {
+                        startPop();
+                    }
+                }, time);
+            }
+
+            function hitPop(e) {
+
             }
         </script>
     </body>
