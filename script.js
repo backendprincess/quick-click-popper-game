@@ -5,6 +5,7 @@ const ROWS_NUMBER = 4;
 const COLS_NUMBER = 4;
 const COL_WIDTH = 100;
 const DEFAULT_LIVES_COUNT = 3;
+const DEFAULT_HEADER_TEXT = 'Press the button to start';
 
 init();
 
@@ -30,6 +31,7 @@ function setPlayAreas() {
     playArea.main = document.querySelector('.main');
     playArea.game = document.querySelector('.game');
     playArea.scorer = document.querySelector('.scorer');
+    playArea.scorer.innerHTML = DEFAULT_HEADER_TEXT;
 }
 
 function setupNewGameButton() {
@@ -171,8 +173,16 @@ function updateScorePanel() {
 
 function setGameOver(isGameOver) {
     player.isGameOver = isGameOver;
-    makeVisible(playArea.main, isGameOver);
-    makeVisible(playArea.game, !isGameOver);
+    if (isGameOver) {
+        returnToMainPage();
+    }
+}
+
+function returnToMainPage() {
+    makeVisible(playArea.main, true);
+    makeVisible(playArea.game, false);
+    
+    playArea.scorer.innerHTML = DEFAULT_HEADER_TEXT;
 }
 
 function makeVisible(element, isVisible) {
