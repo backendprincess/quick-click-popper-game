@@ -16,6 +16,33 @@ function init() {
     buildBoard();
 }
 
+function loadTilesAssets() {
+    fetch('https://raw.githubusercontent.com/backendprincess/quick-click-popper-game/master/iconsData.json'
+    ).then(function(rep) {
+        return rep.json();
+    }).then(function(data) {
+        tilesAssets = data.data;
+    });
+}
+
+function setPlayAreas() {
+    playArea.stats = document.querySelector('.stats');
+    playArea.main = document.querySelector('.main');
+    playArea.game = document.querySelector('.game');
+    playArea.scorer = document.querySelector('.scorer');
+}
+
+function setupNewGameButton() {
+    const newGameButton = document.querySelector('.new-game');
+    newGameButton.addEventListener('click', handleStartNewGameTapped);
+}
+
+function resetGameValues() {
+    player.isGameOver = false;
+    player.score = 0;
+    player.lives = DEFAULT_LIVES_COUNT;
+}
+
 function buildBoard() {
     makeVisible(playArea.main, true);
 
@@ -26,6 +53,17 @@ function buildBoard() {
         let rowElement = getNewRowWithTiles(currRowNumber);    
         playArea.game.appendChild(rowElement);
     }
+}
+
+function handleStartNewGameTapped(e) {
+    startGame();
+}
+
+function startGame() {
+    makeVisible(playArea.main, false);
+    makeVisible(playArea.game, true);
+    resetGameValues();
+    startPoppingTiles();
 }
 
 function getNewRowWithTiles(rowNumber) {
@@ -52,26 +90,6 @@ function appendNewTile(rowElement, tileNumber) {
     tileElement.setAttribute('class', 'tile');
     tileElement.innerText = tileNumber;
     rowElement.appendChild(tileElement);
-}
-
-function getRandomTile() {
-    const tiles = document.querySelectorAll('.tile');
-    const randomIndex = Math.floor(Math.random() * tiles.length);
-    if (randomIndex === playArea.lastPoppedTileIndex) {
-        return getRandomTile();
-    }
-
-    playArea.lastPoppedTileIndex = randomIndex;
-    return tiles[randomIndex];
-}
-
-function displayTileValue(tileToPop) {
-    const randomIndex = Math.floor(Math.random() * tilesAssets.length);
-    tileToPop.tileNumber = tileToPop.innerText;
-    tileToPop.tileValue = tilesAssets[randomIndex].value;
-
-    const newTileText = `${tilesAssets[randomIndex].icon} <br> ${tilesAssets[randomIndex].value}`;
-    tileToPop.innerHTML = newTileText;
 }
 
 function setTileActive(tile, isActive) {
@@ -106,6 +124,26 @@ function startPoppingTiles() {
     updateScorePanel();
 }
 
+function getRandomTile() {
+    const tiles = document.querySelectorAll('.tile');
+    const randomIndex = Math.floor(Math.random() * tiles.length);
+    if (randomIndex === playArea.lastPoppedTileIndex) {
+        return getRandomTile();
+    }
+
+    playArea.lastPoppedTileIndex = randomIndex;
+    return tiles[randomIndex];
+}
+
+function displayTileValue(tileToPop) {
+    const randomIndex = Math.floor(Math.random() * tilesAssets.length);
+    tileToPop.tileNumber = tileToPop.innerText;
+    tileToPop.tileValue = tilesAssets[randomIndex].value;
+
+    const newTileText = `${tilesAssets[randomIndex].icon} <br> ${tilesAssets[randomIndex].value}`;
+    tileToPop.innerHTML = newTileText;
+}
+
 function decrementLives() {
     --player.lives;
     updateScorePanel();
@@ -127,34 +165,6 @@ function handlePoppedTileTapped(e) {
     }
 }
 
-function startGame() {
-    makeVisible(playArea.main, false);
-    makeVisible(playArea.game, true);
-    resetGameValues();
-    startPoppingTiles();
-}
-
-function setPlayAreas() {
-    playArea.stats = document.querySelector('.stats');
-    playArea.main = document.querySelector('.main');
-    playArea.game = document.querySelector('.game');
-    playArea.scorer = document.querySelector('.scorer');
-}
-
-function setupNewGameButton() {
-    const newGameButton = document.querySelector('.new-game');
-    newGameButton.addEventListener('click', handleStartNewGameTapped);
-}
-
-function loadTilesAssets() {
-    fetch('https://raw.githubusercontent.com/backendprincess/quick-click-popper-game/master/iconsData.json'
-    ).then(function(rep) {
-        return rep.json();
-    }).then(function(data) {
-        tilesAssets = data.data;
-    });
-}
-
 function updateScorePanel() {
     playArea.scorer.innerHTML = `Score: ${player.score} Lives: ${player.lives}`;
 }
@@ -171,14 +181,4 @@ function makeVisible(element, isVisible) {
     } else {
         element.classList.remove('visible');
     }    
-}
-
-function handleStartNewGameTapped(e) {
-    startGame();
-}
-
-function resetGameValues() {
-    player.isGameOver = false;
-    player.score = 0;
-    player.lives = DEFAULT_LIVES_COUNT;
 }
