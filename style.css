@@ -1,55 +1,64 @@
+.starter {
+    text-align: center;
+}
 
-            .btn {
-                cursor: pointer;
-                padding: 15px;
-                border: 1px solid black;
-                text-align: center;
-                background-color: blue;
-                color: white;
-            }
+.new-game {
+    cursor: pointer;
+    padding: 15px;
+    border: 1px solid black;
+    text-align: center;
+    background-color: blue;
+    color: white;
+    font-family: fantasy;
+}
 
-            .page {
-                display: none;
-                margin: auto;
-                margin-top: 40px;
-            }
+.page {
+    display: none;
+    margin: auto;
+    margin-top: 40px;
+}
 
-            .visible {
-                display: block;
-            }
+.visible {
+    display: block;
+}
 
-            .pop {
-                border: 1px solid #ddd;
-                width: 100px;
-                height: 100px;
-                display: inline-block;
-                text-align: center;
-                vertical-align: middle;
-                color: #ddd;
-                font-size: 2em;
-                font-family: fantasy;
-            }
+.tile {
+    border: 1px solid #ddd;
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    color: #ddd;
+    font-size: 2em;
+    font-family: monospace;
+}
 
-            .row {
-                display: block;
-            }
+.row {
+    display: block;
+}
 
-            .game {
-                border: 1px solid black;
-            }
+.game {
+    border: 1px solid black;
+}
 
-            .active {
-                background-color: aliceblue;
-                border: 1px solid red;
-                color: black;
-                box-shadow: 5px 5px #555;
-                cursor: pointer;
-            }
+.active {
+    background-color: aliceblue;
+    border: 1px solid red;
+    color: black;
+    box-shadow: 5px 5px #555;
+    cursor: pointer;
+}
 
-            .stats {
-                height: 50px;
-                background-color: black;
-                color: white;
-                font-size: 1.5em;
-                text-align: center;
-            }
+.stats {
+    height: 50px;
+    background-color: black;
+    color: white;
+    font-size: 1.5em;
+    text-align: center;    
+    padding-top: 20px;
+}
+
+.scorer {
+    font-family: monospace;
+}

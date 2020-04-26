@@ -1,130 +1,184 @@
 const playArea = {};
-            const player = {};
+const player = {};
+let tilesAssets;
+const ROWS_NUMBER = 4;
+const COLS_NUMBER = 4;
+const COL_WIDTH = 100;
+const DEFAULT_LIVES_COUNT = 3;
 
-            playArea.stats = document.querySelector('.stats');
-            playArea.main = document.querySelector('.main');
-            playArea.game = document.querySelector('.game');
-            playArea.btns = Array.from(document.querySelectorAll('.btn'));
-            playArea.pages = Array.from(document.querySelectorAll('.page'));
-            document.addEventListener('DOMContentLoaded', getData);
-            let gameObj;
+init();
 
-            playArea.btns.forEach(function(item) {
-                item.addEventListener('click', handleBtn);
-            });
+function init() {    
+    loadTilesAssets();
+    setPlayAreas();
+    setupNewGameButton();
+    resetGameValues();
+    buildBoard();
+}
 
-            function getData() {
-                playArea.main.classList.add('visible');
-                fetch('https://raw.githubusercontent.com/backendprincess/quick-click-popper-game/master/iconsData.json')
-                .then(function(rep) {
-                    return rep.json();
-                }).then(function(data) {
-                    gameObj = data.data;
-                    buildBoard();
-                });
-            }
+function buildBoard() {
+    makeVisible(playArea.main, true);
 
-            function updateScore() {
-                playArea.scorer.innerHTML = 'Score: ' + player.score + ' Lives: ' + player.items;
-            }
+    playArea.game.style.width = COLS_NUMBER * COL_WIDTH + COLS_NUMBER * 2;
+    playArea.game.style.margin = 'auto';
 
-            function buildBoard() {
-                playArea.scorer = document.createElement('span');
-                playArea.scorer.innerHTML = 'Press Button to Start';
-                playArea.stats.appendChild(playArea.scorer);
-                let rows = 4;
-                let cols = 4;
-                let cnt = 0;
-                playArea.game.style.width = cols * 100 + cols * 2;
-                playArea.game.style.margin = 'auto';
-                for (let y = 0; y < rows; ++y) {
-                    let divMain = document.createElement('div');
-                    divMain.setAttribute('class', 'row');
-                    divMain.style.width = cols * 100 + cols * 2;
-                    for (let x = 0; x < cols; ++x) {
-                        let div = document.createElement('div');
-                        div.setAttribute('class', 'pop');
-                        cnt++;
-                        div.innerText = cnt;
-                        div.cnt = cnt;
-                        divMain.appendChild(div);
-                    }
-                    playArea.game.appendChild(divMain);
-                }
-            }
+    for (let currRowNumber = 0; currRowNumber < ROWS_NUMBER; ++currRowNumber) {    
+        let rowElement = getNewRowWithTiles(currRowNumber);    
+        playArea.game.appendChild(rowElement);
+    }
+}
 
-            function handleBtn(e) {
-                if (e.target.classList.contains('newGame')) {
-                    startGame();
-                }
-            }
+function getNewRowWithTiles(rowNumber) {
+    let rowElement = getNewRowElement();
 
-            function startGame() {
-                player.score = 0;
-                player.items = 3;
-                playArea.main.classList.remove('visible');
-                playArea.game.classList.add('visible');
-                player.gameOver = false;
-                startPop();
-                updateScore();
-            }
+    for (let currColNumber = 0; currColNumber < COLS_NUMBER; ++currColNumber) {
+        const tileNumber = rowNumber * COLS_NUMBER + currColNumber;
+        appendNewTile(rowElement, tileNumber);
+    }
 
-            function randomUp() {
-                const pops = document.querySelectorAll('.pop');
-                const idx = Math.floor(Math.random() * pops.length);
-                if (pops[idx].cnt == playArea.last) {
-                    return randomUp();
-                }
+    return rowElement;
+}
 
-                playArea.last = pops[idx].cnt;
-                return pops[idx];
-            }
+function getNewRowElement() {
+    let rowElement = document.createElement('div');
+    rowElement.setAttribute('class', 'row');
+    rowElement.style.width = COLS_NUMBER * COL_WIDTH + COLS_NUMBER * 2;
 
-            function startPop() {
-                let newPop = randomUp();
-                newPop.classList.add('active');
-                newPop.addEventListener('click', hitPop);
+    return rowElement;
+}
 
-                const time = Math.round(Math.random() * 1500 + 750);
-                const val = Math.floor(Math.random() * gameObj.length);
-                newPop.old = newPop.innerText;
-                newPop.v = gameObj[val].value;
-                newPop.innerHTML = gameObj[val].icon + '<br>' + gameObj[val].value;
-                playArea.inPlay = setTimeout(() => {
-                    newPop.classList.remove('active');
-                    newPop.removeEventListener('click', hitPop);
-                    newPop.innerText = newPop.old;
-                    if (newPop.v > 0) {
-                        player.items--;
-                        updateScore();
-                    }
+function appendNewTile(rowElement, tileNumber) {
+    let tileElement = document.createElement('div');
+    tileElement.setAttribute('class', 'tile');
+    tileElement.innerText = tileNumber;
+    rowElement.appendChild(tileElement);
+}
 
-                    if (player.items <= 0) {
-                        gameOver();
-                    }
+function getRandomTile() {
+    const tiles = document.querySelectorAll('.tile');
+    const randomIndex = Math.floor(Math.random() * tiles.length);
+    if (randomIndex === playArea.lastPoppedTileIndex) {
+        return getRandomTile();
+    }
 
-                    if (!player.gameOver) {
-                        startPop();
-                    }
-                }, time);
-            }
+    playArea.lastPoppedTileIndex = randomIndex;
+    return tiles[randomIndex];
+}
 
-            function gameOver() {
-                player.gameOver = true;
-                playArea.main.classList.add('visible');
-                playArea.game.classList.remove('visible');
-                document.querySelector('.newGame').innerText = 'Try Again';
-            }
+function displayTileValue(tileToPop) {
+    const randomIndex = Math.floor(Math.random() * tilesAssets.length);
+    tileToPop.tileNumber = tileToPop.innerText;
+    tileToPop.tileValue = tilesAssets[randomIndex].value;
 
-            function hitPop(e) {
-                let newPop = e.target;
-                player.score = player.score + newPop.v;
-                newPop.classList.remove('active');
-                newPop.removeEventListener('click', hitPop);
-                newPop.innerText = newPop.old;
-                clearTimeout(playArea.inPlay);
-                if (!player.gameOver) {
-                    startPop();
-                }
-                updateScore();
-            }
+    const newTileText = `${tilesAssets[randomIndex].icon} <br> ${tilesAssets[randomIndex].value}`;
+    tileToPop.innerHTML = newTileText;
+}
+
+function setTileActive(tile, isActive) {
+    if (isActive) {
+        tile.classList.add('active');
+        tile.addEventListener('click', handlePoppedTileTapped);
+        displayTileValue(tile);
+    } else {
+        tile.classList.remove('active');
+        tile.removeEventListener('click', handlePoppedTileTapped);
+        tile.innerText = tile.tileNumber;
+    }    
+}
+
+function startPoppingTiles() {
+    let tileToPop = getRandomTile();
+    setTileActive(tileToPop, true);
+
+    const time = Math.round(Math.random() * 1500 + 750);    
+    playArea.deactivateTile = setTimeout(() => {
+        setTileActive(tileToPop, false);
+        const didLoseLife = tileToPop.tileValue > 0;
+        if (didLoseLife) {
+            decrementLives();
+        }
+
+        if (!player.isGameOver) {
+            startPoppingTiles();
+        }
+    }, time);
+
+    updateScorePanel();
+}
+
+function decrementLives() {
+    --player.lives;
+    updateScorePanel();
+
+    const outOfLives = player.lives <= 0;
+    setGameOver(outOfLives);
+}
+
+function handlePoppedTileTapped(e) {
+    let poppedTile = e.target;
+    player.score = player.score + poppedTile.tileValue;
+    updateScorePanel();
+    
+    setTileActive(poppedTile, false);
+    clearTimeout(playArea.deactivateTile);
+
+    if (!player.isGameOver) {
+        startPoppingTiles();
+    }
+}
+
+function startGame() {
+    makeVisible(playArea.main, false);
+    makeVisible(playArea.game, true);
+    resetGameValues();
+    startPoppingTiles();
+}
+
+function setPlayAreas() {
+    playArea.stats = document.querySelector('.stats');
+    playArea.main = document.querySelector('.main');
+    playArea.game = document.querySelector('.game');
+    playArea.scorer = document.querySelector('.scorer');
+}
+
+function setupNewGameButton() {
+    const newGameButton = document.querySelector('.new-game');
+    newGameButton.addEventListener('click', handleStartNewGameTapped);
+}
+
+function loadTilesAssets() {
+    fetch('https://raw.githubusercontent.com/backendprincess/quick-click-popper-game/master/iconsData.json'
+    ).then(function(rep) {
+        return rep.json();
+    }).then(function(data) {
+        tilesAssets = data.data;
+    });
+}
+
+function updateScorePanel() {
+    playArea.scorer.innerHTML = `Score: ${player.score} Lives: ${player.lives}`;
+}
+
+function setGameOver(isGameOver) {
+    player.isGameOver = isGameOver;
+    makeVisible(playArea.main, isGameOver);
+    makeVisible(playArea.game, !isGameOver);
+}
+
+function makeVisible(element, isVisible) {
+    if (isVisible) {
+        element.classList.add('visible');
+    } else {
+        element.classList.remove('visible');
+    }    
+}
+
+function handleStartNewGameTapped(e) {
+    startGame();
+}
+
+function resetGameValues() {
+    player.isGameOver = false;
+    player.score = 0;
+    player.lives = DEFAULT_LIVES_COUNT;
+}
